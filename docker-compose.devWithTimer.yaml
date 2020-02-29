@@ -55,6 +55,33 @@ services:
         - rabbitmq
     command: ["/data/scripts/wait-for-it.sh", "rabbitmq:5672", "-t", "25", "--", "nodemon", "-L", "--watch", "/data/engine/*", "--watch", "/data/core/*",  "--ignore", "configuration.js", "--max-old-space-size=4096",  "/data/engine/app.js"]
 
+  facebook:
+    build:
+      context: .
+      dockerfile: ./facebook/Dockerfile-alpine
+    container_name: facebook
+    image: semanticbus/facebook
+    environment:
+      - APP_PORT=3030
+      - NODE_ENV=development_docker
+      - CONFIG_URL=$CONFIG_URL
+    volumes:
+      - ./facebook:/data/facebook
+      - ./core:/data/core
+    networks:
+      - bus
+    ports:
+      - "3030:3030"
+    expose:
+      - "3030"
+    links:
+        - mongodb
+        - rabbitmq
+    depends_on:
+        - mongodb
+        - rabbitmq
+    command: ["/data/scripts/wait-for-it.sh", "rabbitmq:5672", "-t", "25", "--", "nodemon", "-L", "--watch", "/data/facebook/*", "--watch", "/data/core/*",  "--ignore", "configuration.js", "--max-old-space-size=4096",  "/data/facebook/app.js"]
+
   main:
     build:
       context: .
